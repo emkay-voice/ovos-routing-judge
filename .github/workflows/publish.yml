@@ -30,10 +30,8 @@ jobs:
         run: |
           pip install -q build
           python -m build
-      - name: Pure Python, entry point present
-        run: |
-          ls dist/*-py3-none-any.whl
-          unzip -p dist/*.whl '*.dist-info/entry_points.txt'
+      - name: Pure Python (a library: no plugin entry point)
+        run: ls dist/*-py3-none-any.whl
       - uses: actions/upload-artifact@v4
         with:
           name: dist
