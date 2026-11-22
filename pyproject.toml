@@ -9,6 +9,7 @@ description = "Who took an utterance, and was it the right skill? One routing ju
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [{name = "emkay-voice"}]
+maintainers = [{name = "Andreas Lorensen"}]
 requires-python = ">=3.9"
 dependencies = []
 keywords = ["ovos", "openvoiceos", "testing", "intent", "routing", "golden utterances"]
