@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Who took an utterance, and was it the right skill? One routing judge for OVOS golden-utterance tests."
 readme = "README.md"
 license = {text = "Apache-2.0"}
-authors = [{name = "Andreas Lorensen", email = "andlo@outlook.dk"}]
+authors = [{name = "emkay-voice"}]
 requires-python = ">=3.9"
 dependencies = []
 keywords = ["ovos", "openvoiceos", "testing", "intent", "routing", "golden utterances"]
