@@ -31,6 +31,12 @@
 
   {"name": "own skill's pending get_response swallowed it", "own": ["timer.ovos"], "known": ["timer.ovos"], "expected": "timer.ovos:start_timer", "messages": [["timer.ovos.converse.get_response", {}]], "kind": "captured"},
 
+  {"name": "the converse ping to an active skill is not a capture", "own": ["hello.you"], "known": ["hello.you"], "expected": "hello.you:hello.intent", "messages": [["hello.you.converse.ping", {"skill_id": "hello.you"}], ["skill.converse.pong", {"skill_id": "hello.you", "can_handle": false}], ["hello.you:hello", {}]], "kind": "hit"},
+
+  {"name": "a converse that declined is not a capture", "own": ["hello.you"], "known": ["hello.you"], "expected": "hello.you:hello.intent", "messages": [["hello.you.converse.request", {}], ["skill.converse.response", {"skill_id": "hello.you", "result": false}], ["hello.you:hello", {}]], "kind": "hit"},
+
+  {"name": "a converse that took it is a capture", "own": ["quiz.you"], "known": ["quiz.you"], "expected": "quiz.you:start_quiz", "messages": [["quiz.you.converse.request", {}], ["skill.converse.response", {"skill_id": "quiz.you", "result": true}]], "kind": "captured"},
+
   {"name": "the question machinery is not a capture", "own": ["timer.ovos"], "known": ["timer.ovos"], "expected": "timer.ovos:start_timer", "messages": [["timer.ovos:start_timer", {}], ["skill.converse.get_response.enable", {}, {"skill_id": "timer.ovos"}], ["skill.converse.get_response.disable", {}]], "kind": "hit"},
 
   {"name": "another skill took it", "own": ["jokes.andlo"], "known": ["jokes.andlo", "wiki.ovos"], "messages": [["wiki.ovos:search", {}]], "kind": "other", "taker": "wiki.ovos"},

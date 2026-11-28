@@ -9,7 +9,9 @@ tier, so a skill that only speaks never beats one an intent was
 dispatched to:
 
   INTENT    an intent dispatched to it (`<id>:<intent>`), ovos.intent.matched,
-            or its pending get_response/converse capturing the utterance
+            or its pending get_response, or a converse that took it
+            (`<id>.converse.request` answered with result true; the
+            `<id>.converse.ping` every active skill gets is no claim)
   PROVIDER  a pipeline plugin asked it for content (common-reading fetch)
   OCP       OCP picked its result (play, or search.populate without a player)
   SKILL     handler start, a fallback that answered (fired as
@@ -41,6 +43,7 @@ OCP_PLAY = "ovos.common_play.play"
 OCP_POPULATE = "ovos.common_play.search.populate"
 OCP_ID = "ovos.common_play"
 OCP_FIRED = "ocp:play"
+CONVERSE_RESPONSE = "skill.converse.response"
 # Message types with a colon that are never "<skill_id>:<intent>".
 _NON_INTENT_PREFIXES = ("mycroft.", "ovos.common_play", "recognizer_loop", "ovos.utterance")
 _COLON_TYPES_NOT_SKILLS = ("ocp", "question", "recognizer_loop", "skill", "mycroft")
@@ -112,6 +115,7 @@ class Claim:
     count: int = 0                   # messages folded in
     _last_speak_type: str = ""
     _sessionless: bool = False
+    _converse_asked: set = field(default_factory=set)
 
     @classmethod
     def from_messages(cls, messages: Iterable[Any], known_ids: Iterable[str] = (),
@@ -122,6 +126,11 @@ class Claim:
         return claim
 
     # ---------------------------------------------------------------- folding
+
+    def _capture(self, owner, rest, source):
+        if self.captured_by is None:
+            self.captured_by = owner
+        self._add(INTENT, owner, f"{owner}:converse.{rest}", source)
 
     def _add(self, tier, skill_id, topic="", source=""):
         if tier in (SKILL, SPEAK) and self._sessionless:
@@ -174,12 +183,20 @@ class Claim:
                     self.provider, self.provider_via = skill, "OCP"
                 self.awaiting_provider = False
             return
+        if msg_type == CONVERSE_RESPONSE:
+            owner = data.get("skill_id") or context.get("skill_id")
+            if owner in self._converse_asked and data.get("result"):
+                self._capture(owner, "request", msg_type)
+            return
         if ".converse." in msg_type:
             owner, _, rest = msg_type.partition(".converse.")
             if owner in known or looks_like_component_id(owner):
-                if self.captured_by is None:
-                    self.captured_by = owner
-                self._add(INTENT, owner, f"{owner}:converse.{rest}", msg_type)
+                if rest == "get_response":
+                    self._capture(owner, rest, msg_type)
+                elif rest == "request":
+                    # asked to converse: a capture only when it says it took it
+                    self._converse_asked.add(owner)
+            # .converse.ping goes to every active skill, and is no capture
             return
         if ":" in msg_type:
             prefix = msg_type.split(":", 1)[0]
